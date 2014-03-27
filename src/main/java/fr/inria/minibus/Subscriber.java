@@ -10,7 +10,7 @@ public interface Subscriber {
 	 * @param eventType
 	 * @param listener
 	 */
-	<E> void subscribe(Class<E> eventType, Listener<E> listener);
+	<E,R> void subscribe(Class<E> eventType, Listener<E,R> listener);
 	
 	/**
 	 * 
@@ -18,7 +18,7 @@ public interface Subscriber {
 	 * @param filter
 	 * @param listener
 	 */
-	<E> void subscribe(Class<E> eventType, String filter, Listener<E> listener);
+	<E,R> void subscribe(Class<E> eventType, String filter, Listener<E,R> listener);
 	
 	/**
 	 * 

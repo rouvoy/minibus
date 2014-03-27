@@ -2,7 +2,9 @@ package fr.inria.minibus.lib;
 
 import java.lang.reflect.Method;
 
-public class MethodListener<E> implements fr.inria.minibus.Listener<E> {
+import fr.inria.minibus.Listener;
+
+public class MethodListener<E,R> implements Listener<E,R> {
 	private final Method handler;
 	private final Object listener;
 
@@ -11,11 +13,13 @@ public class MethodListener<E> implements fr.inria.minibus.Listener<E> {
 		handler = m;
 	}
 
-	public void notify(E event) {
+	@SuppressWarnings("unchecked")
+	public R notify(E event) {
 		try {
-			this.handler.invoke(listener, event);
+			return (R) this.handler.invoke(listener, event);
 		} catch (Exception e) {
 			PublicationException.forward(e);
 		}
+		return null;
 	}
 }

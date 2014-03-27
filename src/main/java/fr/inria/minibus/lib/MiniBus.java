@@ -13,24 +13,24 @@ import fr.inria.minibus.Subscribe;
 /**
  * 
  */
-public class EventBus implements Bus {
+public class MiniBus implements Bus {
 	private final Subscribers subscribers = new Subscribers();
 	private final ExecutorService execution;
 
-	public EventBus(int poolSize) {
+	public MiniBus(int poolSize) {
 		this.execution = Executors.newFixedThreadPool(poolSize);
 	}
 
-	public <E> void subscribe(Class<E> eventType, Listener<E> listener) {
+	public <E,R> void subscribe(Class<E> eventType, Listener<E,R> listener) {
 		SubscriptionException.checkNotNull(eventType,
 				"null event types are not supported");
 		SubscriptionException.checkNotNull(listener,
 				"empty listener are not supported");
-		subscribers.add(eventType, new Subscription<E>(listener));
+		subscribers.add(eventType, new Subscription<E,R>(listener,this));
 	}
 
-	public <E> void subscribe(Class<E> eventType, String filter,
-			Listener<E> listener) {
+	public <E,R> void subscribe(Class<E> eventType, String filter,
+			Listener<E,R> listener) {
 		SubscriptionException.checkNotNull(eventType,
 				"null event types are not supported");
 		SubscriptionException.checkNotNull(filter,
@@ -38,8 +38,8 @@ public class EventBus implements Bus {
 		SubscriptionException.checkNotNull(listener,
 				"empty listener are not supported");
 		try {
-			subscribers.add(eventType, new FilterSubscription<E>(filter,
-					listener));
+			subscribers.add(eventType, new FilterSubscription<E,R>(filter,
+					listener,this));
 		} catch (FilterException e) {
 			SubscriptionException.forward(e);
 		}
@@ -54,8 +54,8 @@ public class EventBus implements Bus {
 
 		@SuppressWarnings("unchecked")
 		public void run() {
-			for (Subscription<?> s : subscribers.get(event.getClass())) {
-				((Subscription<E>) s).apply(event, execution);
+			for (Subscription<?,?> s : subscribers.get(event.getClass())) {
+				((Subscription<E,?>) s).apply(event, execution);
 			}
 		}
 	}

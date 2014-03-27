@@ -3,6 +3,7 @@ package fr.inria.minibus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.mockito.Mock;
 
 import fr.inria.minibus.lib.SubscriptionException;
 
@@ -11,82 +12,86 @@ import fr.inria.minibus.lib.SubscriptionException;
  */
 @RunWith(JUnit4.class)
 public class SubscribeTest extends BusTest {
+	@Mock
+	protected IncorrectEventHandler incorrectHandler;
+	
+	
 	@Test(expected = SubscriptionException.class)
 	public void subscribeNullListenerIsForbidden() {
-		eventBus.subscribe(Event.class, null);
+		miniBus.subscribe(Event.class, null);
 	}
 
 	@Test(expected = SubscriptionException.class)
 	public void subscribeNullEventIsForbidden() {
-		eventBus.subscribe(null, listener);
+		miniBus.subscribe(null, listener);
 	}
 
 	@Test
 	public void subscribeListenerShouldBeCorrect() {
-		eventBus.subscribe(Event.class, listener);
+		miniBus.subscribe(Event.class, listener);
 	}
 
 	@Test
 	public void subscribeMultipleListenersShouldBeCorrect() {
-		eventBus.subscribe(Event.class, listener);
-		eventBus.subscribe(Event.class, anotherListener);
+		miniBus.subscribe(Event.class, listener);
+		miniBus.subscribe(Event.class, anotherListener);
 	}
 
 	@Test
 	public void subscribeMultipleEventsShouldBeCorrect() {
-		eventBus.subscribe(Event.class, listener);
-		eventBus.subscribe(OtherEvent.class, otherListener);
+		miniBus.subscribe(Event.class, listener);
+		miniBus.subscribe(OtherEvent.class, otherListener);
 	}
 
 	@Test(expected = SubscriptionException.class)
 	public void subscribeWithFilterNullListenerIsForbidden() {
-		eventBus.subscribe(Event.class, matchingStringFilter, null);
+		miniBus.subscribe(Event.class, matchingStringFilter, null);
 	}
 
 	@Test(expected = SubscriptionException.class)
 	public void subscribeWithFilterNullEventIsForbidden() {
-		eventBus.subscribe(null, matchingStringFilter, listener);
+		miniBus.subscribe(null, matchingStringFilter, listener);
 	}
 
 	@Test(expected = SubscriptionException.class)
 	public void subscribeWithFilterNullFilterIsForbidden() {
-		eventBus.subscribe(Event.class, null, listener);
+		miniBus.subscribe(Event.class, null, listener);
 	}
 
 	@Test
 	public void subscribeFilteredListenerShouldBeCorrect() {
-		eventBus.subscribe(Event.class, matchingStringFilter, listener);
+		miniBus.subscribe(Event.class, matchingStringFilter, listener);
 	}
 
 	@Test
 	public void subscribeFilteredMultipleListenersShouldBeCorrect() {
-		eventBus.subscribe(Event.class, matchingStringFilter, listener);
-		eventBus.subscribe(Event.class, matchingStringFilter, anotherListener);
+		miniBus.subscribe(Event.class, matchingStringFilter, listener);
+		miniBus.subscribe(Event.class, matchingStringFilter, anotherListener);
 	}
 
 	@Test(expected = SubscriptionException.class)
 	public void subscribeIncorrectHandlerisForbidden() {
-		eventBus.subscribe(this.incorrectHandler);
+		miniBus.subscribe(this.incorrectHandler);
 	}
 
 	@Test(expected = SubscriptionException.class)
 	public void subscribeEmptyHandlerisForbidden() {
-		eventBus.subscribe(this.listener);
+		miniBus.subscribe(this.listener);
 	}
 
 	@Test
 	public void subscribeHandlerShouldBeCorrect() {
-		eventBus.subscribe(this.correctHandler);
+		miniBus.subscribe(this.correctHandler);
 	}
 
 	@Test
 	public void subscribeFilteredHandlerShouldBeCorrect() {
-		eventBus.subscribe(this.filteredHandler);
+		miniBus.subscribe(this.filteredHandler);
 	}
 
 	@Test
 	public void subscribeMultipleHandlersShouldBeCorrect() {
-		eventBus.subscribe(this.correctHandler);
-		eventBus.subscribe(this.filteredHandler);
+		miniBus.subscribe(this.correctHandler);
+		miniBus.subscribe(this.filteredHandler);
 	}
 }

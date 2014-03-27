@@ -6,16 +6,20 @@ import org.mockito.MockitoAnnotations;
 
 import fr.inria.minibus.Listener;
 import fr.inria.minibus.Subscribe;
-import fr.inria.minibus.lib.EventBus;
+import fr.inria.minibus.lib.MiniBus;
 
 public class BusTest {
 	public static final class Event {
-		public String label = "event";
-		public int number = 10;
-
-		@Override
+		public String label;
+		public int number;
+		
+		public Event(String l, int n) {
+			this.label = l;
+			this.number = n;
+		}
+		
 		public String toString() {
-			return "Event(" + label + "," + number + ")";
+			return "<"+label+","+number+">";
 		}
 	}
 
@@ -30,12 +34,12 @@ public class BusTest {
 	}
 
 	public interface FilteredEventHandler {
-		@Subscribe("label=event")
+		@Subscribe(matchingStringFilter)
 		void onEvent(Event e);
 	}
 
 	public static final class OtherEvent {
-		String label = "another label";
+		public String label = "another label";
 	}
 
 	protected static final String matchingStringFilter = "label=event";
@@ -47,24 +51,22 @@ public class BusTest {
 	protected static final String unknownFilter = "name=Doe";
 
 	@Mock
-	protected Listener<Event> listener;
+	protected Listener<Event,Void> listener;
 	@Mock
-	protected Listener<Event> anotherListener;
+	protected Listener<Event,Void> anotherListener;
 	@Mock
-	protected Listener<OtherEvent> otherListener;
+	protected Listener<OtherEvent,Void> otherListener;
 
-	@Mock
-	protected IncorrectEventHandler incorrectHandler;
 	@Mock
 	protected EventHandler correctHandler;
 	@Mock
 	protected FilteredEventHandler filteredHandler;
 
-	protected EventBus eventBus;
+	protected MiniBus miniBus;
 
 	@Before
 	public void setup() {
-		eventBus = new EventBus(1);
+		miniBus = new MiniBus(1);
 		MockitoAnnotations.initMocks(this);
 	}
 }

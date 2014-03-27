@@ -10,15 +10,15 @@ import java.util.Map;
  *
  */
 public class Subscribers {
-	private final Map<Class<?>, Collection<Subscription<?>>> subscribers = new HashMap<Class<?>, Collection<Subscription<?>>>();
+	private final Map<Class<?>, Collection<Subscription<?,?>>> subscribers = new HashMap<Class<?>, Collection<Subscription<?,?>>>();
 
 	/**
 	 * @param eventType
 	 * @param handler
 	 * @param trigger
 	 */
-	public <E> void add(Class<E> eventType, Subscription<E> subscription) {
-		Collection<Subscription<?>> handlers = get(eventType);
+	public <E,R> void add(Class<E> eventType, Subscription<E,R> subscription) {
+		Collection<Subscription<?,?>> handlers = get(eventType);
 		handlers.add(subscription);
 	}
 	
@@ -26,10 +26,10 @@ public class Subscribers {
 	 * @param eventType
 	 * @return
 	 */
-	public <E> Collection<Subscription<?>> get(Class<E> eventType) {
-		Collection<Subscription<?>> subscriptions = this.subscribers.get(eventType);
+	public <E> Collection<Subscription<?,?>> get(Class<E> eventType) {
+		Collection<Subscription<?,?>> subscriptions = this.subscribers.get(eventType);
 		if (subscriptions == null) {
-			subscriptions = new LinkedList<Subscription<?>>();
+			subscriptions = new LinkedList<Subscription<?,?>>();
 			this.subscribers.put(eventType, subscriptions);
 		}
 		return subscriptions;
