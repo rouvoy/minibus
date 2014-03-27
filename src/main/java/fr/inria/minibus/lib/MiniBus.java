@@ -21,16 +21,16 @@ public class MiniBus implements Bus {
 		this.execution = Executors.newFixedThreadPool(poolSize);
 	}
 
-	public <E,R> void subscribe(Class<E> eventType, Listener<E,R> listener) {
+	public <E, R> void subscribe(Class<E> eventType, Listener<E, R> listener) {
 		SubscriptionException.checkNotNull(eventType,
 				"null event types are not supported");
 		SubscriptionException.checkNotNull(listener,
 				"empty listener are not supported");
-		subscribers.add(eventType, new Subscription<E,R>(listener,this));
+		subscribers.add(eventType, new Subscription<E, R>(listener, this));
 	}
 
-	public <E,R> void subscribe(Class<E> eventType, String filter,
-			Listener<E,R> listener) {
+	public <E, R> void subscribe(Class<E> eventType, String filter,
+			Listener<E, R> listener) {
 		SubscriptionException.checkNotNull(eventType,
 				"null event types are not supported");
 		SubscriptionException.checkNotNull(filter,
@@ -38,8 +38,8 @@ public class MiniBus implements Bus {
 		SubscriptionException.checkNotNull(listener,
 				"empty listener are not supported");
 		try {
-			subscribers.add(eventType, new FilterSubscription<E,R>(filter,
-					listener,this));
+			subscribers.add(eventType, new FilterSubscription<E, R>(filter,
+					listener, this));
 		} catch (FilterException e) {
 			SubscriptionException.forward(e);
 		}
@@ -54,8 +54,8 @@ public class MiniBus implements Bus {
 
 		@SuppressWarnings("unchecked")
 		public void run() {
-			for (Subscription<?,?> s : subscribers.get(event.getClass())) {
-				((Subscription<E,?>) s).apply(event, execution);
+			for (Subscription<?, ?> s : subscribers.get(event.getClass())) {
+				((Subscription<E, ?>) s).apply(event, execution);
 			}
 		}
 	}
@@ -77,7 +77,7 @@ public class MiniBus implements Bus {
 		for (Class<?> implemented : type.getInterfaces())
 			found |= subscribe(subscriber, implemented);
 		if (!found)
-			SubscriptionException.raise("No method handler found for "
+			SubscriptionException.raise("No method handler found in "
 					+ subscriber);
 	}
 
