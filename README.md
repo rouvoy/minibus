@@ -58,13 +58,19 @@ public class SubscribingObject {
         bus.subscribe(this);
     }
   
-    @Subscribe void onAnyValue(Event e) {
-        System.out.println("Received event with value " + e.value);
+    @Subscribe
+    public String onAnyValue(Event e) {
+        return "Received event with value " + e.value;
     }
   
-    @Subscribe(filter="value>0")
-    void onStrictPositiveValue(Event e) {
-        System.out.println("Received event with value " + e.value);
+    @Subscribe("value>0")
+    public String onStrictPositiveValue(Event e) {
+        return "Event "+e+" is strictly positive ";
+    }
+    
+    @Subscribe
+    public void print(String msg) {
+        System.out.println(msg);
     }
 }
 ```
