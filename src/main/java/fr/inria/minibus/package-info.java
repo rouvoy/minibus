@@ -1,8 +1,7 @@
 /**
+ * API of minibus exposed to developers.
  * 
- */
-/**
- * @author rouvoy
+ * @author Romain Rouvoy
  *
  */
 package fr.inria.minibus;

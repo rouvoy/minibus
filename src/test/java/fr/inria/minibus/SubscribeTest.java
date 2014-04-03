@@ -28,7 +28,7 @@ public class SubscribeTest extends BusTest {
 
 	@Test
 	public void subscribeListenerShouldBeCorrect() {
-		miniBus.subscribe(Event.class, listener);
+		miniBus.subscribe(Event.class, listener).unsubscribe();
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class SubscribeTest extends BusTest {
 
 	@Test
 	public void subscribeFilteredListenerShouldBeCorrect() {
-		miniBus.subscribe(Event.class, matchingStringFilter, listener);
+		miniBus.subscribe(Event.class, matchingStringFilter, listener).unsubscribe();
 	}
 
 	@Test
@@ -81,12 +81,12 @@ public class SubscribeTest extends BusTest {
 
 	@Test
 	public void subscribeHandlerShouldBeCorrect() {
-		miniBus.subscribe(this.correctHandler);
+		miniBus.subscribe(this.correctHandler).unsubscribe();
 	}
 
 	@Test
 	public void subscribeFilteredHandlerShouldBeCorrect() {
-		miniBus.subscribe(this.filteredHandler);
+		miniBus.subscribe(this.filteredHandler).unsubscribe();
 	}
 
 	@Test

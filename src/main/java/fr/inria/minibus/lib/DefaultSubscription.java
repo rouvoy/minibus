@@ -4,14 +4,21 @@ import java.util.concurrent.Executor;
 
 import fr.inria.minibus.Listener;
 import fr.inria.minibus.Publisher;
+import fr.inria.minibus.Subscription;
 
-public class Subscription<E, R> {
+public class DefaultSubscription<E, R> implements Subscription {
 	private final Listener<E, R> listener;
-	private final Publisher publisher;
+	private final MiniBus bus;
+	private final Subscribers subscribers;
+	private final Class<E> type;
 
-	public Subscription(Listener<E, R> l, Publisher p) {
+	public DefaultSubscription(Listener<E, R> l, MiniBus p, Subscribers s,
+			Class<E> type) {
 		this.listener = l;
-		this.publisher = p;
+		this.bus = p;
+		this.subscribers = s;
+		this.type = type;
+
 	}
 
 	public static final class NotifyTask<E, R> implements Runnable {
@@ -36,11 +43,14 @@ public class Subscription<E, R> {
 		for (int i = 0; i < 10; i++)
 			// Try 10 times if it fails
 			try {
-				executor.execute(new NotifyTask<E, R>(event, listener,
-						publisher));
+				executor.execute(new NotifyTask<E, R>(event, listener, bus));
 				return;
 			} catch (Exception e) {
 				PublicationException.forward(e);
 			}
+	}
+
+	public void unsubscribe() {
+		subscribers.get(type).remove(this);
 	}
 }

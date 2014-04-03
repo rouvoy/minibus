@@ -9,9 +9,10 @@ import fr.inria.jfilter.FilterException;
 import fr.inria.minibus.Bus;
 import fr.inria.minibus.Listener;
 import fr.inria.minibus.Subscribe;
+import fr.inria.minibus.Subscription;
 
 /**
- * 
+ * Core implementation of the bus.
  */
 public class MiniBus implements Bus {
 	private final Subscribers subscribers = new Subscribers();
@@ -21,15 +22,19 @@ public class MiniBus implements Bus {
 		this.execution = Executors.newFixedThreadPool(poolSize);
 	}
 
-	public <E, R> void subscribe(Class<E> eventType, Listener<E, R> listener) {
+	public <E, R> Subscription subscribe(Class<E> eventType,
+			Listener<E, R> listener) {
 		SubscriptionException.checkNotNull(eventType,
 				"null event types are not supported");
 		SubscriptionException.checkNotNull(listener,
 				"empty listener are not supported");
-		subscribers.add(eventType, new Subscription<E, R>(listener, this));
+		DefaultSubscription<E, R> s = new DefaultSubscription<E, R>(listener,
+				this, subscribers, eventType);
+		subscribers.add(eventType, s);
+		return s;
 	}
 
-	public <E, R> void subscribe(Class<E> eventType, String filter,
+	public <E, R> Subscription subscribe(Class<E> eventType, String filter,
 			Listener<E, R> listener) {
 		SubscriptionException.checkNotNull(eventType,
 				"null event types are not supported");
@@ -38,11 +43,14 @@ public class MiniBus implements Bus {
 		SubscriptionException.checkNotNull(listener,
 				"empty listener are not supported");
 		try {
-			subscribers.add(eventType, new FilterSubscription<E, R>(filter,
-					listener, this));
+			FilterSubscription<E, R> s = new FilterSubscription<E, R>(filter,
+					listener, this, subscribers, eventType);
+			subscribers.add(eventType, s);
+			return s;
 		} catch (FilterException e) {
 			SubscriptionException.forward(e);
 		}
+		return null;
 	}
 
 	public final class PublishTask<E> implements Runnable {
@@ -54,8 +62,9 @@ public class MiniBus implements Bus {
 
 		@SuppressWarnings("unchecked")
 		public void run() {
-			for (Subscription<?, ?> s : subscribers.get(event.getClass())) {
-				((Subscription<E, ?>) s).apply(event, execution);
+			for (DefaultSubscription<?, ?> s : subscribers
+					.get(event.getClass())) {
+				((DefaultSubscription<E, ?>) s).apply(event, execution);
 			}
 		}
 	}
@@ -71,38 +80,38 @@ public class MiniBus implements Bus {
 		this.execution.awaitTermination(time, TimeUnit.MILLISECONDS);
 	}
 
-	public void subscribe(Object subscriber) {
+	public Subscription subscribe(Object subscriber) {
 		Class<?> type = subscriber.getClass();
-		boolean found = subscribe(subscriber, type);
+		GroupSubscription s = new GroupSubscription();
+		subscribe(subscriber, type, s);
 		for (Class<?> implemented : type.getInterfaces())
-			found |= subscribe(subscriber, implemented);
-		if (!found)
+			subscribe(subscriber, implemented, s);
+		if (s.isEmpty())
 			SubscriptionException.raise("No method handler found in "
 					+ subscriber);
+		return s;
 	}
 
-	private boolean subscribe(Object subscriber, Class<?> type) {
-		boolean found = false;
+	private void subscribe(Object subscriber, Class<?> type,
+			GroupSubscription subscriptions) {
 		for (Method m : type.getDeclaredMethods()) {
 			Subscribe annotation = m.getAnnotation(Subscribe.class);
-			if (annotation != null) {
-				subscribe(subscriber, m, annotation);
-				found = true;
-			}
+			if (annotation != null)
+				subscriptions.add(subscribe(subscriber, m, annotation));
 		}
-		return found;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void subscribe(Object subscriber, Method m, Subscribe annotation) {
+	private Subscription subscribe(Object subscriber, Method m,
+			Subscribe annotation) {
 		Class<?>[] parameters = m.getParameterTypes();
 		if (parameters.length != 1)
 			SubscriptionException.raise("Method \'" + m.getName()
 					+ "\' should have a single parameter");
 		if ("".equals(annotation.value()))
-			subscribe(parameters[0], new MethodListener(subscriber, m));
+			return subscribe(parameters[0], new MethodListener(subscriber, m));
 		else
-			subscribe(parameters[0], annotation.value(), new MethodListener(
-					subscriber, m));
+			return subscribe(parameters[0], annotation.value(),
+					new MethodListener(subscriber, m));
 	}
 }

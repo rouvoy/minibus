@@ -6,6 +6,8 @@ import org.junit.runners.Parameterized;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import fr.inria.minibus.BusTest.Event;
+
 /**
  * Unit test for an event bus.
  */
@@ -54,6 +56,14 @@ public class PublishToHandlerTest extends PublishTest {
 		Thread.sleep(100);
 		miniBus.shutdown(100);
 		Mockito.verify(this.filteredHandler).onEvent(event);
+	}
+	
+	@Test
+	public void unsubscribedEventShouldNotBeDelivered() throws InterruptedException {
+		Subscription s = miniBus.subscribe(this.correctHandler);
+		s.unsubscribe();
+		miniBus.publish(event);
+		Mockito.verifyZeroInteractions(this.correctHandler);
 	}
 
 	@Test

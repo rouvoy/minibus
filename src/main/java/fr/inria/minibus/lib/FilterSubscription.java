@@ -6,14 +6,13 @@ import fr.inria.jfilter.Filter;
 import fr.inria.jfilter.FilterException;
 import fr.inria.jfilter.FilterParser;
 import fr.inria.minibus.Listener;
-import fr.inria.minibus.Publisher;
 
-public class FilterSubscription<E, R> extends Subscription<E, R> {
+public class FilterSubscription<E, R> extends DefaultSubscription<E, R> {
 	private final Filter filter;
 
-	public FilterSubscription(String f, Listener<E, R> l, Publisher p)
+	public FilterSubscription(String f, Listener<E, R> l, MiniBus p, Subscribers subscribers, Class<E> type)
 			throws FilterException {
-		super(l, p);
+		super(l, p, subscribers, type);
 		this.filter = FilterParser.instance.parse(f);
 	}
 

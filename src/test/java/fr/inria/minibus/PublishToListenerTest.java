@@ -40,6 +40,14 @@ public class PublishToListenerTest extends PublishTest {
 	}
 
 	@Test
+	public void unsubscribedEventShouldNotBeDelivered() throws InterruptedException {
+		Subscription s = miniBus.subscribe(Event.class, listener);
+		s.unsubscribe();
+		miniBus.publish(event);
+		Mockito.verifyZeroInteractions(listener);
+	}
+
+	@Test
 	public void publishMultipleEventsShouldBeDelivered()
 			throws InterruptedException {
 		miniBus.subscribe(Event.class, listener);
