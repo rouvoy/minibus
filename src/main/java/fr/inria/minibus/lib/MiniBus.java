@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import fr.inria.jfilter.FilterException;
+import fr.inria.jfilter.ParsingException;
 import fr.inria.minibus.Bus;
 import fr.inria.minibus.Listener;
 import fr.inria.minibus.Subscribe;
@@ -67,7 +67,7 @@ public class MiniBus implements Bus {
 					listener, this, subscribers, eventType);
 			subscribers.add(eventType, s);
 			return s;
-		} catch (FilterException e) {
+		} catch (ParsingException e) {
 			SubscriptionException.forward(e);
 		}
 		return null;
